@@ -3,8 +3,8 @@
 > AI Technical Assignment — Computer Vision & OCR (Offline Deployment)
 
 **Quick links:**
-- [WandB Training Run](https://wandb.ai/yrevash-student/human-animal-detection/runs/8v9x9i8e) — full training logs, loss curves, accuracy charts
-- [Streamlit App](#streamlit-app) — interactive UI for both detection and OCR
+- [WandB Training Run](https://api.wandb.ai/links/yrevash-student/063chsq1) — full training logs, loss curves, accuracy charts
+- [Streamlit App](https://haocri.streamlit.app/) — interactive UI for both detection and OCR
 - [Dataset on Roboflow](https://universe.roboflow.com/yrevash-7tnv7/humans-and-animals-detection-vv9pj) — 17,756 images, custom annotations
 
 ---
