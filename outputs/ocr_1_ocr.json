@@ -1,0 +1,51 @@
+{
+  "file": "ocr_1.png",
+  "num_text_regions": 2,
+  "extracted_lines": [
+    {
+      "text": "64TH SPT CEN RAO",
+      "confidence": 0.9419,
+      "bbox": [
+        [
+          375,
+          459
+        ],
+        [
+          655,
+          389
+        ],
+        [
+          665,
+          428
+        ],
+        [
+          385,
+          498
+        ]
+      ]
+    },
+    {
+      "text": "ADC SPY TEAN",
+      "confidence": 0.8819,
+      "bbox": [
+        [
+          366,
+          499
+        ],
+        [
+          611,
+          435
+        ],
+        [
+          621,
+          473
+        ],
+        [
+          376,
+          537
+        ]
+      ]
+    }
+  ],
+  "full_text": "64TH SPT CEN RAO | ADC SPY TEAN"
+}
