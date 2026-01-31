@@ -1,9 +1,9 @@
 opencv-python-headless
+paddlepaddle==3.2.2
+paddleocr
 torch
 torchvision
 numpy
 pillow
 tqdm
-paddlepaddle
-paddleocr
 streamlit
