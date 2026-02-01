@@ -28,7 +28,7 @@ from ocr.pipeline import (
 
 st.set_page_config(page_title="AI Pipeline — Detection & OCR", layout="wide")
 
-# ── Model Loading (cached — loads once) ──────────────────────────────────────
+
 
 @st.cache_resource
 def load_detection_models():
@@ -63,7 +63,6 @@ def load_orientation_detector():
     return build_orientation_detector()
 
 
-# ── Detection helpers ────────────────────────────────────────────────────────
 
 CONF_THRESHOLD = 0.6
 NMS_THRESHOLD = 0.3
@@ -155,7 +154,7 @@ def get_duration_options(total_seconds):
     return options
 
 
-# ── File discovery helpers ───────────────────────────────────────────────────
+
 
 def list_sample_videos():
     exts = ("*.mp4", "*.avi", "*.mov", "*.mkv")
@@ -219,13 +218,9 @@ def format_file_size(path):
     return f"{size:.1f} TB"
 
 
-# ── TABS ─────────────────────────────────────────────────────────────────────
+
 
 tab_detect, tab_ocr, tab_results = st.tabs(["Human & Animal Detection", "Industrial OCR", "Results Browser"])
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# TAB 1: DETECTION
-# ═══════════════════════════════════════════════════════════════════════════════
 
 with tab_detect:
     st.header("Human & Animal Detection")
@@ -352,10 +347,6 @@ with tab_detect:
                 os.unlink(video_path)
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# TAB 2: OCR
-# ═══════════════════════════════════════════════════════════════════════════════
-
 with tab_ocr:
     st.header("Offline OCR — Stenciled / Industrial Text")
     st.caption("Pick a sample image or upload your own to extract text.")
@@ -450,15 +441,10 @@ with tab_ocr:
                     )
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# TAB 3: RESULTS BROWSER
-# ═══════════════════════════════════════════════════════════════════════════════
-
 with tab_results:
     st.header("Results Browser")
     st.caption("Browse previously generated detection videos and OCR results from `outputs/`.")
 
-    # ── Detection Results ─────────────────────────────────────────────────────
 
     st.subheader("Detection Videos")
 
@@ -516,7 +502,7 @@ with tab_results:
 
     st.divider()
 
-    # ── OCR Results ───────────────────────────────────────────────────────────
+
 
     st.subheader("OCR Results")
 
@@ -525,7 +511,7 @@ with tab_results:
     if not ocr_pairs:
         st.info("No OCR results found in `outputs/`. Run OCR first to generate results.")
     else:
-        # Build display names from the jpg filenames
+        # Build display names from the jpg filename
         display_names = [os.path.basename(jpg) for jpg, _ in ocr_pairs]
         chosen_idx = st.selectbox(
             "Select an OCR result",

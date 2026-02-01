@@ -1,9 +1,3 @@
-"""
-FIXED INFERENCE PIPELINE
-- Proper NMS to remove duplicate boxes
-- Two-model approach: Detection + Classification
-"""
-
 import os
 import torch
 import torchvision
@@ -15,25 +9,17 @@ from PIL import Image
 import cv2
 import torch.nn as nn
 
-# ============================================
-# CONFIGURATION
-# ============================================
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 CONFIDENCE_THRESHOLD = 0.6  # Higher = fewer false positives
-NMS_THRESHOLD = 0.3  # Lower = fewer duplicate boxes (0.3 is good)
+NMS_THRESHOLD = 0.3  # Lower = fewer duplicate boxes 
 
-# QUICK TEST MODE: Process only first N seconds
-# Set to None to process entire video
-# Set to 10 to process only first 10 seconds
-PROCESS_SECONDS = 3  # Change to 5, 10, 20, etc. for quick testing
+
+PROCESS_SECONDS = 3  
 
 print(f"Using device: {DEVICE}")
 if PROCESS_SECONDS:
     print(f"⚡ QUICK TEST MODE: Processing only first {PROCESS_SECONDS} seconds")
 
-# ============================================
-# LOAD MODELS
-# ============================================
 print("Loading models...")
 
 # MODEL 1: Faster R-CNN (Detection)
@@ -61,9 +47,6 @@ classify_transform = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-# ============================================
-# APPLY NMS TO REMOVE DUPLICATES
-# ============================================
 def apply_nms(boxes, scores, labels, nms_threshold=NMS_THRESHOLD):
     """
     Apply Non-Maximum Suppression to remove duplicate detections
@@ -91,9 +74,6 @@ def apply_nms(boxes, scores, labels, nms_threshold=NMS_THRESHOLD):
     
     return boxes[keep_indices], scores[keep_indices], labels[keep_indices]
 
-# ============================================
-# VIDEO PROCESSING
-# ============================================
 def process_video(video_path, output_path):
     """
     Two-stage pipeline with NMS:
@@ -116,7 +96,6 @@ def process_video(video_path, output_path):
     frame_count = 0
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     
-    # Calculate max frames to process
     if PROCESS_SECONDS:
         max_frames = int(fps * PROCESS_SECONDS)
         total_frames = min(total_frames, max_frames)
@@ -131,7 +110,6 @@ def process_video(video_path, output_path):
         
         frame_count += 1
         
-        # Stop if we've processed enough frames
         if PROCESS_SECONDS and frame_count > total_frames:
             print(f"\n⏹️  Stopped at {PROCESS_SECONDS} seconds")
             break
@@ -141,7 +119,6 @@ def process_video(video_path, output_path):
         
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
-        # STAGE 1: Object Detection
         img_tensor = transforms.ToTensor()(rgb_frame).unsqueeze(0).to(DEVICE)
         
         with torch.no_grad():
@@ -150,22 +127,18 @@ def process_video(video_path, output_path):
         boxes = detections['boxes']
         scores = detections['scores']
         labels = detections['labels']
-        
-        # Filter by confidence
+    
         keep = scores > CONFIDENCE_THRESHOLD
         boxes = boxes[keep]
         scores = scores[keep]
         labels = labels[keep]
         
-        # Apply NMS to remove duplicates
         if len(boxes) > 0:
             boxes, scores, labels = apply_nms(boxes, scores, labels, NMS_THRESHOLD)
-        
-        # STAGE 2: Classify each detection
+
         for box, det_score, det_label in zip(boxes, scores, labels):
             x1, y1, x2, y2 = map(int, box.tolist())
             
-            # Ensure valid crop
             x1 = max(0, x1)
             y1 = max(0, y1)
             x2 = min(width, x2)
@@ -173,14 +146,13 @@ def process_video(video_path, output_path):
             
             if x2 <= x1 or y2 <= y1:
                 continue
-            
-            # Crop detection
+        
             crop = rgb_frame[y1:y2, x1:x2]
             
             if crop.size == 0:
                 continue
             
-            # Classify crop
+
             crop_pil = Image.fromarray(crop)
             crop_tensor = classify_transform(crop_pil).unsqueeze(0).to(DEVICE)
             
@@ -190,19 +162,15 @@ def process_video(video_path, output_path):
                 class_idx = pred.argmax(1).item()
                 clf_conf = class_prob[0][class_idx].item()
             
-            # Map class (animal=0, human=1 based on folder alphabetical order)
+
             label_name = "ANIMAL" if class_idx == 0 else "HUMAN"
             
-            # Color coding
+
             if label_name == "ANIMAL":
-                color = (255, 140, 0)  # Orange
+                color = (255, 140, 0)  
             else:
-                color = (0, 255, 0)    # Green
-            
-            # Draw box
+                color = (0, 255, 0)    
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 3)
-            
-            # Combined confidence: detection * classification
             combined_conf = det_score.item() * clf_conf
             text = f"{label_name} {combined_conf:.2f}"
             
@@ -217,8 +185,7 @@ def process_video(video_path, output_path):
                 color,
                 -1
             )
-            
-            # Text
+        
             cv2.putText(
                 frame,
                 text,
@@ -235,9 +202,6 @@ def process_video(video_path, output_path):
     out.release()
     print(f"\n✅ Processed {frame_count} frames")
 
-# ============================================
-# AUTO-PROCESS ALL VIDEOS
-# ============================================
 def process_all_videos():
     os.makedirs("test_videos", exist_ok=True)
     os.makedirs("outputs", exist_ok=True)
